@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "ScanJF",
+    "slug": "ScanJF",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
