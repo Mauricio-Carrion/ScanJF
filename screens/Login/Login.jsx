@@ -1,16 +1,39 @@
 import React from 'react';
-import { StyleSheet, TextInput, Text, View, TouchableHighlight } from 'react-native';
+import { StyleSheet, TextInput, Text, View, TouchableHighlight, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-const Login = () => {
+const Login = ({ navigation }) => {
+
+  const handleSubmitBtn = () => {
+    alert('apertou entrar')
+  }
+
   return (
     <View style={styles.loginBg}>
-      <View style={styles.blueCircle}></View>
+      <TouchableOpacity onPress={() => navigation.navigate('Config')} activeOpacity={0.6} underlayColor="#00A8E8" style={styles.iconSettings}>
+        <Icon name="gear" size={40} color="#FFF" />
+      </TouchableOpacity>
+
+      <View style={styles.blueCircle} />
+
       <View style={styles.form}>
-        <TextInput style={styles.input} placeholder="Usuário"></TextInput>
-        <TextInput style={styles.input} placeholder="Senha"></TextInput>
+        <View style={styles.inputLabels}>
+          <Icon name="user" size={20} color="#007FFF" style={styles.icon} />
+          <TextInput style={styles.input} placeholder="Usuário" />
+        </View>
+
+        <View style={styles.inputLabels}>
+          <Icon name="lock" size={20} color="#007FFF" style={styles.icon} />
+          <TextInput secureTextEntry={true} style={styles.input} placeholder="Senha" />
+        </View>
       </View>
-      <TouchableHighlight style={styles.button} title="Entrar">
-        <Text>Entrar</Text>
+
+      <TouchableHighlight
+        underlayColor="#00A8E8"
+        onPress={handleSubmitBtn}
+        style={styles.button}
+        title="Entrar">
+        <Text style={{ color: "#fff" }}>Entrar</Text>
       </TouchableHighlight>
     </View>
   )
@@ -28,7 +51,7 @@ const styles = StyleSheet.create({
   blueCircle: {
     position: 'absolute',
     backgroundColor: '#007FFF',
-    top: -260,
+    top: -200,
     width: '140%',
     height: 570,
     borderRadius: 300,
@@ -37,8 +60,8 @@ const styles = StyleSheet.create({
   },
 
   form: {
-    position: 'relative',
-    top: 85
+    position: 'absolute',
+    bottom: 300
   },
 
   input: {
@@ -48,11 +71,13 @@ const styles = StyleSheet.create({
     marginTop: 45,
     borderWidth: 0,
     borderRadius: 25,
-    padding: 10,
+    paddingLeft: 40,
     backgroundColor: '#d9d9d9',
   },
 
   button: {
+    position: 'absolute',
+    bottom: 100,
     flexDirection: 'row',
     backgroundColor: '#007FFF',
     borderRadius: 25,
@@ -61,7 +86,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 48,
     width: 190
+  },
+
+  icon: {
+    position: 'absolute',
+    left: 10,
+    zIndex: 999,
+    paddingTop: 44,
+  },
+
+  iconSettings: {
+    position: 'absolute',
+    top: 45,
+    right: 20,
+    zIndex: 999,
+  },
+
+  inputLabels: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
   }
+
 });
 
 export default Login;
