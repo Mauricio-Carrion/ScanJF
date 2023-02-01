@@ -1,4 +1,4 @@
-package com.scanjf.newarchitecture;
+package com.anonymous.ScanJF.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -20,9 +20,9 @@ import com.facebook.react.fabric.EmptyReactNativeConfig;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.fabric.ReactNativeConfig;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.scanjf.BuildConfig;
-import com.scanjf.newarchitecture.components.MainComponentsRegistry;
-import com.scanjf.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.anonymous.ScanJF.BuildConfig;
+import com.anonymous.ScanJF.newarchitecture.components.MainComponentsRegistry;
+import com.anonymous.ScanJF.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

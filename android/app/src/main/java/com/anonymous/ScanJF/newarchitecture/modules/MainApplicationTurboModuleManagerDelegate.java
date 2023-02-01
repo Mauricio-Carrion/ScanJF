@@ -1,4 +1,4 @@
-package com.scanjf.newarchitecture.modules;
+package com.anonymous.ScanJF.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;

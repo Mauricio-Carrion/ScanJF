@@ -1,4 +1,4 @@
-package com.scanjf;
+package com.anonymous.ScanJF;
 
 import android.os.Build;
 import android.os.Bundle;
