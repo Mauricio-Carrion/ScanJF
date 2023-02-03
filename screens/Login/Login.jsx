@@ -1,6 +1,8 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, TextInput, Text, View, TouchableHighlight, TouchableOpacity } from 'react-native';
+import Main from '../Main/Main';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import host from '../../api';
 import axios from 'axios';
 
@@ -8,27 +10,48 @@ const Login = ({ navigation }) => {
 
   const [user, setUser] = useState('')
   const [password, setPassword] = useState('')
+  const [userStatus, setUserStatus] = useState()
+
+  const verifyUserOnStorage = async () => {
+    try {
+      let user = await AsyncStorage.getItem('usuario')
+      user ? setUserStatus(true) : ''
+    } catch (error) {
+      alert(error)
+    }
+  }
+
+  useEffect(() => {
+    verifyUserOnStorage()
+  }, [])
 
   const handleSubmitBtn = async () => {
     let hostAdress = await host()
-    const options = {
-      headers: {
-        usuario: user,
-        password: password
+    const headers = {
+      'usuario': user,
+      'senha': password
+    }
+
+    const setUserOnStorage = async () => {
+      try {
+        await AsyncStorage.setItem('usuario', user)
+        await AsyncStorage.setItem('senha', password)
+      } catch (error) {
+        alert(error)
       }
     }
 
-    console.log(user, password);
-
     if (user && password) {
 
-      console.log(hostAdress);
       hostAdress ?
-        axios.post(`${hostAdress}/usuario`, options)
+        axios.get(`${hostAdress}/usuario`, { headers: headers })
           .then(res => {
-            res.status == 200 ?
+            if (res.status == 200) {
+
+              setUserOnStorage()
+
               navigation.navigate('Main')
-              : ''
+            }
           })
           .catch(err => alert(err.response.data.msg))
         :
@@ -36,36 +59,42 @@ const Login = ({ navigation }) => {
     } else {
       alert('Digite o usuário e a senha')
     }
+
+    setUser('')
+    setPassword('')
   }
 
   return (
-    <View style={styles.loginBg}>
-      <TouchableOpacity onPress={() => navigation.navigate('Config')} activeOpacity={0.6} underlayColor="#00A8E8" style={styles.iconSettings}>
-        <Icon name="gear" size={40} color="#FFF" />
-      </TouchableOpacity>
+    userStatus ?
+      <Main />
+      :
+      <View style={styles.loginBg}>
+        <TouchableOpacity onPress={() => navigation.navigate('Config')} activeOpacity={0.6} underlayColor="#00A8E8" style={styles.iconSettings}>
+          <Icon name="gear" size={40} color="#FFF" />
+        </TouchableOpacity>
 
-      <View style={styles.blueCircle} />
+        <View style={styles.blueCircle} />
 
-      <View style={styles.form}>
-        <View style={styles.inputLabels}>
-          <Icon name="user" size={20} color="#007FFF" style={styles.icon} />
-          <TextInput style={styles.input} placeholder="Usuário" onChangeText={text => setUser(text)} />
+        <View style={styles.form}>
+          <View style={styles.inputLabels}>
+            <Icon name="user" size={20} color="#007FFF" style={styles.icon} />
+            <TextInput value={user} style={styles.input} placeholder="Usuário" onChangeText={text => setUser(text)} />
+          </View>
+
+          <View style={styles.inputLabels}>
+            <Icon name="lock" size={20} color="#007FFF" style={styles.icon} />
+            <TextInput value={password} secureTextEntry={true} style={styles.input} placeholder="Senha" onChangeText={text => setPassword(text)} />
+          </View>
         </View>
 
-        <View style={styles.inputLabels}>
-          <Icon name="lock" size={20} color="#007FFF" style={styles.icon} />
-          <TextInput secureTextEntry={true} style={styles.input} placeholder="Senha" onChangeText={text => setPassword(text)} />
-        </View>
+        <TouchableHighlight
+          underlayColor="#00A8E8"
+          onPress={() => handleSubmitBtn()}
+          style={styles.button}
+          title="Entrar">
+          <Text style={{ color: "#fff" }}>Entrar</Text>
+        </TouchableHighlight>
       </View>
-
-      <TouchableHighlight
-        underlayColor="#00A8E8"
-        onPress={() => handleSubmitBtn()}
-        style={styles.button}
-        title="Entrar">
-        <Text style={{ color: "#fff" }}>Entrar</Text>
-      </TouchableHighlight>
-    </View>
   )
 };
 
