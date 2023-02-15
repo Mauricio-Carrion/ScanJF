@@ -1,11 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, Component } from 'react';
 import {
   StyleSheet,
   TextInput,
   Text,
   View,
+  SafeAreaView,
   TouchableOpacity,
-  Button
+  KeyboardAvoidingView,
+  Button,
+  Dimensions
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -49,10 +52,35 @@ const Main = ({ navigation }) => {
       'password': password
     }
 
-    console.log(`${hostAdress}/produto/${code}`);
     await axios.get(`${hostAdress}/produto/${code}`, { headers: headers })
       .then(res => setProductData(res.data))
       .catch(error => console.error(error))
+  }
+
+  const putProduct = async () => {
+    const hostAdress = await host()
+
+    const headers = {
+      'user': user,
+      'password': password
+    }
+
+    const data = {
+      empresa: productData.CODEMPR,
+      codigo: productData.CODPROD,
+      produto: productData.NOMPROD,
+      saldo: newQtd,
+      saldoAnterior: productData.SALDATUA
+    }
+
+    console.log(productData);
+    console.log(productData.CODEMPR);
+
+    await axios.put(`${hostAdress}/produto`, data, { headers: headers })
+      .then(res => alert("Saldo alterado!"))
+      .catch(error => alert(error.response.data.msg))
+
+    handleCancelEdit()
   }
 
   const handleBarCodeScanned = ({ type, data }) => {
@@ -76,95 +104,111 @@ const Main = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.mainView}>
-      <View style={styles.topBar}>
-        <TouchableOpacity title='logout' style={styles.logout} onPress={removeUserOnStorage}>
-          <Icon name="logout" size={30} color="#FFF" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.mainView}>
+      <KeyboardAvoidingView
+        behavior='position'
+        style={styles.container}>
+        <View style={{
+          width: Dimensions.get('window').width,
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
 
-      <TouchableOpacity style={styles.cameraView} onPress={() => setScanStatus(true)}>
-        {
-          hasPermission && scanStatus ?
-            <BarCodeScanner
-              onBarCodeScanned={scanStatus ? handleBarCodeScanned : undefined}
-              style={{ width: 460, height: 465 }}
-            />
-            :
-            <>
-              <Icon name='barcode-scan' size={80} color="#007FFF" />
-              <Text style={{ color: "#007FFF", fontSize: 20, margin: 10 }}>Consultar produto</Text>
-            </>
-        }
-      </TouchableOpacity>
+          <View style={styles.topBar}>
+            <TouchableOpacity title='logout' style={styles.logout} onPress={removeUserOnStorage}>
+              <Icon name="logout" size={30} color="#FFF" />
+            </TouchableOpacity>
+          </View>
 
-      <View style={styles.obsView}>
-        {scanStatus && <Button title={'Cancelar'} onPress={() => setScanStatus(false)} />}
+          <TouchableOpacity style={styles.cameraView} onPress={() => setScanStatus(true)}>
+            {
+              hasPermission && scanStatus ?
+                <BarCodeScanner
+                  onBarCodeScanned={scanStatus ? handleBarCodeScanned : undefined}
+                  style={{ width: 460, height: 465 }}
+                />
+                :
+                <>
+                  <Icon name='barcode-scan' size={80} color="#007FFF" />
+                  <Text style={{ color: "#007FFF", fontSize: 20, margin: 10 }}>Consultar produto</Text>
+                </>
+            }
+          </TouchableOpacity>
 
-        <View style={styles.obsRows}>
-          <Text style={styles.rowsTitle}>Código:</Text>
-          <Text style={styles.rowsValue}>{productData ? productData.CODPROD : ''}</Text>
-        </View>
+          <View style={styles.obsView}>
+            {scanStatus && <Button title={'Cancelar'} onPress={() => setScanStatus(false)} />}
 
-        <View style={styles.obsRows}>
-          <Text style={styles.rowsTitle}>Nome:</Text>
-          <Text style={styles.rowsValue}>{productData ? productData.NOMPROD : ''}</Text>
-        </View>
-
-        <View style={styles.obsRows}>
-          <Text style={styles.rowsTitle}>Preço:</Text>
-          <Text style={styles.rowsValue}>{productData ? productData.preco : ''}</Text>
-        </View>
-
-        <View style={styles.obsRows}>
-          <Text style={styles.rowsTitle}>Qtd atual:</Text>
-          <Text style={styles.rowsValue}>{productData ? `${productData.SALDATUA} ${productData.UNUNIT}` : ''}</Text>
-        </View>
-      </View>
-
-      {
-        productData ?
-          <>
-            <View style={{ marginTop: 50 }}>
-              <Text style={styles.qtdText}>
-                Nova Quantidade
-              </Text>
-
-              <View style={styles.viewQtd}>
-                <TouchableOpacity style={styles.btnMinusPlus} onPress={() => setNewQtd(newQtd - 1)}>
-                  <Icon name="minus" size={30} color="#FFF" />
-                </TouchableOpacity>
-
-                <TextInput
-                  value={String(newQtd)}
-                  keyboardType='numeric'
-                  style={styles.inputQtd}
-                  onChangeText={text => setNewQtd(Number(text))} />
-
-                <TouchableOpacity style={styles.btnMinusPlus} onPress={() => setNewQtd(newQtd + 1)}>
-                  <Icon name="plus" size={30} color="#FFF" />
-                </TouchableOpacity>
-              </View>
+            <View style={styles.obsRows}>
+              <Text style={styles.rowsTitle}>Código:</Text>
+              <Text style={styles.rowsValue}>{productData ? productData.CODPROD : ''}</Text>
             </View>
 
-            <View style={styles.viewButtons}>
-              <TouchableOpacity style={styles.btnLimpar} onPress={() => handleCancelEdit()}>
-                <Text style={styles.btnLimparTxt}>Cancelar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.btnSalvar} onPress={() => setProductData('')}>
-                <Text style={styles.btnSalvarTxt}>Salvar</Text>
-              </TouchableOpacity>
+            <View style={styles.obsRows}>
+              <Text style={styles.rowsTitle}>Nome:</Text>
+              <Text style={styles.rowsValue}>{productData ? productData.NOMPROD : ''}</Text>
             </View>
-          </>
-          : ''
-      }
 
-    </View>
+            <View style={styles.obsRows}>
+              <Text style={styles.rowsTitle}>Preço:</Text>
+              <Text style={styles.rowsValue}>{productData ? `R$ ${productData.PVUNIT}` : ''}</Text>
+            </View>
+
+            <View style={styles.obsRows}>
+              <Text style={styles.rowsTitle}>Qtd atual:</Text>
+              <Text style={styles.rowsValue}>{productData ? `${productData.SALDATUA} ${productData.UNUNIT}` : ''}</Text>
+            </View>
+          </View>
+          {
+            productData ?
+              <>
+
+                <View style={{ marginTop: 50 }}>
+                  <Text style={styles.qtdText}>
+                    Nova Quantidade
+                  </Text>
+
+                  <View style={styles.viewQtd}>
+                    <TouchableOpacity style={styles.btnMinusPlus} onPress={() => setNewQtd(newQtd - 1)}>
+                      <Icon name="minus" size={30} color="#FFF" />
+                    </TouchableOpacity>
+
+                    <TextInput
+                      value={String(newQtd)}
+                      keyboardType='numeric'
+                      style={styles.inputQtd}
+                      onChangeText={text => setNewQtd(Number(text))} />
+
+                    <TouchableOpacity style={styles.btnMinusPlus} onPress={() => setNewQtd(newQtd + 1)}>
+                      <Icon name="plus" size={30} color="#FFF" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.viewButtons}>
+                  <TouchableOpacity style={styles.btnLimpar} onPress={() => handleCancelEdit()}>
+                    <Text style={styles.btnLimparTxt}>Cancelar</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.btnSalvar} onPress={() => putProduct()}>
+                    <Text style={styles.btnSalvarTxt}>Salvar</Text>
+                  </TouchableOpacity>
+                </View>
+
+              </>
+              : ''
+          }
+        </View>
+      </KeyboardAvoidingView >
+    </SafeAreaView >
   )
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center'
+  },
+
   topBar: {
     width: "100%",
     height: 85,
@@ -175,11 +219,9 @@ const styles = StyleSheet.create({
   },
 
   mainView: {
-    width: '100%',
+    flex: 1,
     height: '100%',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'flex-start'
+    justifyContent: 'center'
   },
 
   logout: {
@@ -196,6 +238,7 @@ const styles = StyleSheet.create({
     borderColor: '#007FFF',
     borderRadius: 20,
     marginTop: 20,
+    alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 15,
@@ -225,12 +268,13 @@ const styles = StyleSheet.create({
     color: '#007FFF',
     fontSize: 20,
     fontWeight: 'bold',
+    overflow: 'hidden',
   },
 
   viewButtons: {
     flexDirection: 'row',
-    position: 'absolute',
-    bottom: 40
+    alignSelf: 'center',
+    marginTop: 40
   },
 
   viewQtd: {
