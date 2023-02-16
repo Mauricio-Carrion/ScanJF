@@ -6,9 +6,11 @@ import {
   View,
   SafeAreaView,
   TouchableOpacity,
+  TouchableHighlight,
   KeyboardAvoidingView,
   Button,
-  Dimensions
+  Dimensions,
+  Modal
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -23,6 +25,18 @@ const Main = ({ navigation }) => {
   const [scanStatus, setScanStatus] = useState(false)
   const [productData, setProductData] = useState(null)
   const [newQtd, setNewQtd] = useState(0)
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+
+  const handleOpenModal = (message) => {
+    setModalVisible(true)
+    setModalMessage(message)
+  }
+
+  const handleCloseModal = () => {
+    setModalVisible(!modalVisible)
+    setModalMessage('')
+  }
 
   useEffect(() => {
     const askForCameraPermission = async () => {
@@ -54,7 +68,7 @@ const Main = ({ navigation }) => {
 
     await axios.get(`${hostAdress}/produto/${code}`, { headers: headers })
       .then(res => setProductData(res.data))
-      .catch(error => console.error(error))
+      .catch(error => handleOpenModal(error.response.data.msg))
   }
 
   const putProduct = async () => {
@@ -77,8 +91,8 @@ const Main = ({ navigation }) => {
     console.log(productData.CODEMPR);
 
     await axios.put(`${hostAdress}/produto`, data, { headers: headers })
-      .then(res => alert("Saldo alterado!"))
-      .catch(error => alert(error.response.data.msg))
+      .then(res => handleOpenModal("Saldo alterado!"))
+      .catch(error => handleOpenModal(error.response.data.msg))
 
     handleCancelEdit()
   }
@@ -94,7 +108,7 @@ const Main = ({ navigation }) => {
       await AsyncStorage.removeItem('senha')
       navigation.navigate('Login')
     } catch (error) {
-      alert(error)
+      handleOpenModal(error)
     }
   }
 
@@ -199,11 +213,83 @@ const Main = ({ navigation }) => {
           }
         </View>
       </KeyboardAvoidingView >
+
+      <Modal
+        animationType='fade'
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          handleCloseModal();
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>{modalMessage}</Text>
+            <TouchableHighlight
+              underlayColor="#00A8E8"
+              style={styles.buttonModal}
+              onPress={() => handleCloseModal()}>
+              <Text style={styles.textStyle}>Fechar</Text>
+            </TouchableHighlight>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView >
   )
 }
 
 const styles = StyleSheet.create({
+  modalText: {
+    textAlign: 'center',
+    fontSize: 16,
+    paddingHorizontal: 60,
+    marginTop: 50,
+    color: '#909090'
+  },
+
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+
+  buttonModal: {
+    backgroundColor: '#007FFF',
+    borderRadius: 20,
+    width: 80,
+    padding: 5,
+    elevation: 2,
+    margin: 10,
+    position: 'absolute',
+    bottom: 35
+  },
+
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    backgroundColor: '#ffffff8f'
+  },
+
+  modalView: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    width: "85%",
+    height: 200,
+    alignItems: 'center',
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
   container: {
     flex: 1,
     alignItems: 'center'
@@ -211,7 +297,8 @@ const styles = StyleSheet.create({
 
   topBar: {
     width: "100%",
-    height: 85,
+    height: 90,
+    marginTop: -10,
     borderRadius: 15,
     backgroundColor: '#007FFF',
     alignItems: 'flex-end',

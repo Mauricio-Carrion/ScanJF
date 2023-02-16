@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';;
 import Config from './screens/Config/Config';
 import Login from './screens/Login/Login';

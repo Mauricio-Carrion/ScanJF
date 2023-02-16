@@ -9,8 +9,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Dimensions,
-  Modal,
-  Pressable
+  Modal
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,6 +20,17 @@ const Login = ({ navigation }) => {
   const [user, setUser] = useState('')
   const [password, setPassword] = useState('')
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+
+  const handleOpenModal = (message) => {
+    setModalVisible(true)
+    setModalMessage(message)
+  }
+
+  const handleCloseModal = () => {
+    setModalVisible(!modalVisible)
+    setModalMessage('')
+  }
 
   const handleSubmitBtn = async () => {
     let hostAdress = await host()
@@ -34,7 +44,7 @@ const Login = ({ navigation }) => {
         await AsyncStorage.setItem('usuario', user)
         await AsyncStorage.setItem('senha', password)
       } catch (error) {
-        alert(error)
+        handleOpenModal(error)
       }
     }
 
@@ -50,16 +60,17 @@ const Login = ({ navigation }) => {
                 navigation.navigate('Main')
               }
             })
-            .catch(err => { alert(err.response.data.msg) })
+            .catch(err => { handleOpenModal(err.response.data.msg) })
           :
-          alert('Configure o ip do servidor!')
+          handleOpenModal('Configure o ip do servidor!')
       } catch (error) {
         console.error(error)
       }
 
     } else {
 
-      setModalVisible(true)
+
+      handleOpenModal('Usuário e senha obrigatórios!')
 
     }
 
@@ -111,15 +122,15 @@ const Login = ({ navigation }) => {
         visible={modalVisible}
         onRequestClose={() => {
           Alert.alert('Modal has been closed.');
-          setModalVisible(!modalVisible);
+          handleCloseModal();
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Usuário e senha obrigatórios</Text>
+            <Text style={styles.modalText}>{modalMessage}</Text>
             <TouchableHighlight
               underlayColor="#00A8E8"
-              style={styles.button}
-              onPress={() => setModalVisible(!modalVisible)}>
+              style={styles.buttonModal}
+              onPress={() => handleCloseModal()}>
               <Text style={styles.textStyle}>Fechar</Text>
             </TouchableHighlight>
           </View>
@@ -131,8 +142,11 @@ const Login = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   modalText: {
-    marginBottom: 90,
     textAlign: 'center',
+    fontSize: 16,
+    paddingHorizontal: 60,
+    marginTop: 50,
+    color: '#909090'
   },
 
   textStyle: {
@@ -141,13 +155,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  button: {
+  buttonModal: {
+    backgroundColor: '#007FFF',
     borderRadius: 20,
+    width: 80,
     padding: 5,
     elevation: 2,
+    margin: 10,
     position: 'absolute',
-    top: 5,
-    width: 10
+    bottom: 35
   },
 
   centeredView: {
@@ -158,13 +174,12 @@ const styles = StyleSheet.create({
   },
 
   modalView: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderRadius: 20,
-    width: "80%",
-    height: 250,
+    width: "85%",
+    height: 200,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 80,
+    padding: 10,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
